@@ -20,7 +20,11 @@ openai.api_key = 'sk-proj-ZuUktF9E9hNj0i4r-HyC_jrrrYn2fGMLgdmlf8-Lns8kxGawCMWsiI
 FACTCHECK_API_URL = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
 FACTCHECK_API_KEY = "AIzaSyAv4nZ5taO8Jc4ucf_ycmQsd3WiBXD6oaw"
 
-translator_client = translate.Client.from_service_account_json('credentials.json')
+# 환경 변수 설정 (코드에서 직접 설정)
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\Users\my_fake_news_detector (2)\credentials.json"
+
+# 번역 클라이언트 초기화
+translator_client = translate.Client()
 
 @app.route('/feedback', methods=['POST'])
 def save_feedback():
