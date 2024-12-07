@@ -21,7 +21,7 @@ FACTCHECK_API_URL = "https://factchecktools.googleapis.com/v1alpha1/claims:searc
 FACTCHECK_API_KEY = "AIzaSyAv4nZ5taO8Jc4ucf_ycmQsd3WiBXD6oaw"
 
 # 환경 변수 설정 (코드에서 직접 설정)
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\Users\my_fake_news_detector (2)\credentials.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\\Users\\my_fake_news_detector (2)\\credentials.json"
 
 # 번역 클라이언트 초기화
 translator_client = translate.Client()
