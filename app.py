@@ -14,13 +14,11 @@ if not os.path.exists('logs'):
 app = Flask(__name__)
 
 # OpenAI API 설정
-openai.api_key = ''
-#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
+openai.api_key = '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'
 
 # 구글 FactCheck API 기본 URL과 키 설정
 FACTCHECK_API_URL = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
-FACTCHECK_API_KEY = ""
-#AIzaSyAv4nZ5taO8Jc4ucf_ycmQsd3WiBXD6oaw
+FACTCHECK_API_KEY = "AIzaSyAv4nZ5taO8Jc4ucf_ycmQsd3WiBXD6oaw"
 
 translator_client = translate.Client.from_service_account_json('credentials.json')
 
