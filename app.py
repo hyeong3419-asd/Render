@@ -21,21 +21,17 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 FACTCHECK_API_URL = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
 FACTCHECK_API_KEY = os.getenv("FACTCHECK_API_KEY")
 
-# Base64로 인코딩된 인증 정보를 환경 변수에서 읽음
-credentials_base64 = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
-if not credentials_base64:
+# 환경 변수에서 인증 파일 경로를 읽음
+credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+if not credentials_path:
     raise ValueError("환경 변수 'GOOGLE_APPLICATION_CREDENTIALS'가 설정되지 않았습니다.")
 
-# 인증 정보를 temp 파일로 저장 후 사용
-credentials = base64.b64decode(credentials_base64)
-with open('/tmp/credentials.json', 'wb') as f:
-    f.write(credentials)
-
 # 인증 파일 경로 설정
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/tmp/credentials.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
 
 # Translator 클라이언트 초기화
 translator_client = translate.Client()
+
 
 @app.route('/feedback', methods=['POST'])
 def save_feedback():
