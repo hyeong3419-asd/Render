@@ -8,30 +8,39 @@ import pymysql
 from bs4 import BeautifulSoup
 from datetime import datetime
 from google.cloud import translate_v2 as translate
+
 # 피드백 로그 파일 설정
 FEEDBACK_LOG_FILE = 'logs/feedback_log.json'
 if not os.path.exists('logs'):
     os.makedirs('logs')
     
 app = Flask(__name__)
+
 # OpenAI API 키 설정
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
 # 구글 FactCheck API 기본 URL과 키 설정
 FACTCHECK_API_URL = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
 FACTCHECK_API_KEY = os.getenv("FACTCHECK_API_KEY")
+
 # 환경 변수에서 Google 인증 정보 가져오기
 google_credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 if not google_credentials:
     raise ValueError("환경 변수 'GOOGLE_APPLICATION_CREDENTIALS'가 설정되지 않았습니다.")
+    
 # JSON 문자열을 Python 딕셔너리로 변환
 credentials_info = json.loads(google_credentials)
+
 # /tmp/google-credentials.json 파일로 저장
 credentials_path = "/tmp/google-credentials.json"
+
 with open(credentials_path, "w") as f:
     json.dump(credentials_info, f)
+    
 # 인증 파일 경로 설정
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
 translator_client = translate.Client()
+
 @app.route('/feedback', methods=['POST'])
 def save_feedback():
     data = request.json
@@ -51,12 +60,15 @@ def save_feedback():
     except Exception as e:
         app.logger.error(f"Feedback save error: {str(e)}")
         return jsonify({"status": "error", "message": "피드백 저장 중 오류가 발생했습니다."})
+        
 def include_feedback_in_prompt(prompt='', query=''):
     feedbacks = get_feedback_for_query(query)
     if feedbacks:
         feedback_summary = "\n".join([f"- {fb['comment']} (Rating: {fb['rating']})" for fb in feedbacks])
-        return f"{prompt}\n\nPast User Feedback for similar queries:\n{feedback_summary}\n\nUse this feedback to refine your response."
+        return f"{prompt}\n\nPast User Feedback for similar queries:\n{feedback_summary}\n\nUse this feedback to improve your response."
     return prompt
+
+
 def translate_text(text, target_language="ko"):
     """
     Google Cloud Translation API를 사용한 번역
@@ -67,9 +79,11 @@ def translate_text(text, target_language="ko"):
     except Exception as e:
         app.logger.error(f"Translation error: {str(e)}")
         return text  # 번역 실패 시 원문 반환
+        
 @app.route('/')
 def home():
     return render_template('index.html')
+    
 @app.route('/check', methods=['POST'])
 def check_news():
     query = request.form.get('query', '')
@@ -104,11 +118,13 @@ def check_news():
     if feedbacks:
         feedback_summary = "\n".join([f"- {fb['comment']} (Rating: {fb['rating']})" for fb in feedbacks])
         prompt += f"\n\nPast User Feedback for similar queries:\n{feedback_summary}\n"
+        
     # GPT 호출
     chatgpt_response = get_chatgpt_response(translated_query, prompt)
     
     # FactCheck API 호출
     factcheck_response = get_factcheck_response(translated_query)
+    
     # FactCheck 결과 번역
     try:
         if factcheck_response.get("text"):
@@ -134,16 +150,23 @@ def check_news():
         "google_news_url": google_news_url
     }
     return jsonify(result)
+    
 def get_chatgpt_response(query, base_prompt=''):
-    prompt = include_feedback_in_prompt(base_prompt, query)
+    # 데이터베이스 정보를 포함한 프롬프트 생성
+    prompt_with_db_info = build_prompt_with_database_info(query, base_prompt)
+    
+    # OpenAI GPT 호출
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": prompt},
+            {"role": "system", "content": prompt_with_db_info},
             {"role": "user", "content": query}
         ]
     )
     return response['choices'][0]['message']['content']
+
+
+    
 def get_factcheck_response(query):
     try:
         params = {
@@ -205,5 +228,41 @@ def get_feedback_for_query(query):
     finally:
         conn.close()
     return feedbacks
+
+def get_database_information(query):
+    """
+    데이터베이스에서 관련 정보를 검색
+    """
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            # 예: 특정 테이블에서 검색
+            sql = "SELECT info FROM your_table WHERE query = %s LIMIT 1"
+            cursor.execute(sql, (query,))
+            result = cursor.fetchone()
+        conn.close()
+        return result['info'] if result else None
+    except Exception as e:
+        app.logger.error(f"Database query error: {str(e)}")
+        return None
+
+def build_prompt_with_database_info(query, base_prompt):
+    # 데이터베이스에서 정보 검색
+    db_info = get_database_information(query)
+    
+    if db_info:
+        # 데이터베이스 정보가 있을 경우 프롬프트에 우선 추가
+        return (
+            f"The following information is from our trusted database and should take precedence:\n"
+            f"{db_info}\n\n"
+            f"Now generate a response to the query below considering this database information:\n{query}"
+        )
+    else:
+        # 데이터베이스 정보가 없을 경우 기본 프롬프트 사용
+        return (
+            f"{base_prompt}\n\n"
+            f"Respond to the following query:\n{query}"
+        )
+
 if __name__ == '__main__':
     app.run(debug=True)
