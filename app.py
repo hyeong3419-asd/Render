@@ -115,6 +115,15 @@ def check_news():
 8. **Language and Translation**:
    Your final analysis must be delivered in **Korean only**, formatted as a single, cohesive paragraph. Use clear and natural Korean language, avoiding English terms unless absolutely necessary (e.g., proper nouns). Ensure the flow is logical and concise.
 
+9.**Database Priority**:
+   If database information is provided, use it as the primary basis for your response. Clearly state that it is database-sourced.
+
+10.**Supplemental Reasoning**:
+   If database information is insufficient or unavailable, use general knowledge and logical reasoning.
+
+11.**Indeterminate Cases**:
+   If the article cannot be conclusively classified as 'Real' or 'Fake', respond with 'Uncertain'. Specify reasons, such as lack of reliable sources or inconclusive evidence.   
+
 ### Additional Instructions:
 - Use the provided database information if applicable.
 - Prioritize factual correctness over stylistic elements.
