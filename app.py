@@ -8,9 +8,9 @@ from datetime import datetime
 from google.cloud import translate_v2 as translate
 
 # 피드백 로그 파일 설정
-#FEEDBACK_LOG_FILE = 'logs/feedback_log.json'
-#if not os.path.exists('logs'):
-#    os.makedirs('logs')
+FEEDBACK_LOG_FILE = 'logs/feedback_log.json'
+if not os.path.exists('logs'):
+    os.makedirs('logs')
 
 app = Flask(__name__)
 
