@@ -154,6 +154,7 @@ def check_news():
 def get_chatgpt_response(query, base_prompt=''):
     # 데이터베이스 정보를 포함한 프롬프트 생성
     prompt_with_db_info = build_prompt_with_database_info(query, base_prompt)
+    app.logger.info(f"Final GPT prompt: {prompt_with_db_info}")
     
     # OpenAI GPT 호출
     response = openai.ChatCompletion.create(
@@ -241,6 +242,7 @@ def get_database_information(query):
             cursor.execute(sql, (query,))
             result = cursor.fetchone()
         conn.close()
+        app.logger.info(f"Database information retrieved: {result}")
         return result['info'] if result else None
     except Exception as e:
         app.logger.error(f"Database query error: {str(e)}")
