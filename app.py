@@ -157,7 +157,7 @@ def get_chatgpt_response(query, base_prompt=''):
     
     # OpenAI GPT 호출
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": prompt_with_db_info},
             {"role": "user", "content": query}
@@ -253,9 +253,11 @@ def build_prompt_with_database_info(query, base_prompt):
     if db_info:
         # 데이터베이스 정보가 있을 경우 프롬프트에 우선 추가
         return (
-            f"The following information is from our trusted database and should take precedence:\n"
+            f"You have access to a database containing verified and reliable information. "
+            f"For the query below, prioritize the following database information when formulating your response:\n"
             f"{db_info}\n\n"
-            f"Now generate a response to the query below considering this database information:\n{query}"
+            f"Query:\n{query}\n\n"
+            f"If the database information is not sufficient, you may supplement it with your general knowledge."
         )
     else:
         # 데이터베이스 정보가 없을 경우 기본 프롬프트 사용
@@ -263,6 +265,7 @@ def build_prompt_with_database_info(query, base_prompt):
             f"{base_prompt}\n\n"
             f"Respond to the following query:\n{query}"
         )
+
 
 if __name__ == '__main__':
     app.run(debug=True)
