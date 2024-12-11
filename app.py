@@ -111,7 +111,7 @@ def check_news():
 
     7. **Context Omission or Misrepresentation**: Check whether the article omits essential context or presents facts in a misleading way. Use tools like [Hoaxy](https://hoaxy.osome.iu.edu) to visualize the spread of information and determine if crucial context is missing. If context is manipulated, classify the article as 'Fake'.
 
-    8. **번역**: 번역: 분석 결과는 각 항목별 번호나 소제목 없이 하나의 단일 단락 형태로 한국어로만 제시해야 하며, 영어 표현이나 불필요한 형식을 사용하지 않고 명확하고 일관된 서술로 모든 평가 결과를 자연스럽게 전달한다.
+    8. **번역**: 분석 결과는 각 항목별 번호나 소제목 없이 하나의 단일 단락으로 한국어만 사용해 제시하며, 불가피한 고유명사 외에는 영어 표현을 사용하지 않고 모두 번역하여 명확하고 일관된 흐름으로 자연스럽게 평가 결과를 전달한다.
 
     **Specialized Tools**:  
     - **Deepfake Detection**: If visuals seem altered or manipulated, assess them using deepfake detection tools such as [Sensity AI](https://www.sensity.ai) or [Defudger](https://defudger.com).  
