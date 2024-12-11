@@ -294,4 +294,4 @@ def build_prompt_with_database_info(query, base_prompt):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)7ㅆㅆㅆㅆㅆㅆㅆㅆ
+    app.run(debug=True)
