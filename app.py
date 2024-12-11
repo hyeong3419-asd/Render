@@ -237,7 +237,7 @@ def get_database_information(query):
         conn = get_connection()
         with conn.cursor() as cursor:
             # 예: 특정 테이블에서 검색
-            sql = "SELECT info FROM capstone WHERE query = %s LIMIT 1"
+            sql = "SELECT comment AS info FROM feedback_log WHERE query = %s LIMIT 1"
             cursor.execute(sql, (query,))
             result = cursor.fetchone()
         conn.close()
