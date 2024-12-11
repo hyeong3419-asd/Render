@@ -157,7 +157,7 @@ def get_chatgpt_response(query, base_prompt=''):
     
     # OpenAI GPT 호출
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": prompt_with_db_info},
             {"role": "user", "content": query}
