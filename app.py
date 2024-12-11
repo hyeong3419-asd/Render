@@ -273,24 +273,37 @@ def get_database_information(query):
         return None
 
 def build_prompt_with_database_info(query, base_prompt):
-    # 데이터베이스에서 정보 검색
     db_info = get_database_information(query)
-    
+
+    instructions = (
+        f"You are an expert in analyzing questions and providing insights based on reliable and structured information.\n"
+        f"Your response should prioritize information retrieved from the database.\n\n"
+        f"### Task Instructions:\n"
+        f"1. **Database Priority**:\n"
+        f"   - First, check the database for relevant information related to the user's question. If relevant data is found, use it as the primary source to construct your response.\n"
+        f"   - If no database information is available, supplement your response with general knowledge or logical reasoning.\n"
+        f"\n2. **Question Interpretation**:\n"
+        f"   - Recognize the input as a user question, not a news article. Your role is to analyze the question and provide a logical, fact-based response.\n"
+        f"\n3. **Context and Reasoning**:\n"
+        f"   - If the database information is insufficient, provide an informed opinion using general knowledge or validated reasoning.\n"
+        f"   - Avoid assuming the input is a news article unless explicitly stated.\n"
+        f"\n4. **Language and Translation**:\n"
+        f"   - Deliver the analysis in Korean only, formatted as a single, cohesive paragraph. Avoid using English terms unless necessary (e.g., proper nouns). Ensure logical flow and clarity.\n"
+    )
+
     if db_info:
-        # 데이터베이스 정보가 있을 경우 프롬프트에 우선 추가
         return (
-            f"You have access to a database containing verified and reliable information. "
-            f"For the query below, prioritize the following database information when formulating your response:\n"
-            f"{db_info}\n\n"
-            f"Query:\n{query}\n\n"
-            f"If the database information is not sufficient, you may supplement it with your general knowledge."
+            f"{instructions}\n"
+            f"### Database Information:\n{db_info}\n\n"
+            f"### User Question:\n{query}\n"
         )
     else:
-        # 데이터베이스 정보가 없을 경우 기본 프롬프트 사용
         return (
-            f"{base_prompt}\n\n"
-            f"Respond to the following query:\n{query}"
+            f"{instructions}\n"
+            f"No database information is available for the question below. Use general knowledge and logical reasoning to answer comprehensively.\n\n"
+            f"### User Question:\n{query}\n"
         )
+
 
 
 if __name__ == '__main__':
