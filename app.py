@@ -168,7 +168,7 @@ def check_news():
 def get_chatgpt_response(query, base_prompt=''):
     prompt = include_feedback_in_prompt(base_prompt, query)
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": prompt},
             {"role": "user", "content": query}
