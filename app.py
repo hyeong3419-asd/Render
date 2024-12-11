@@ -12,6 +12,13 @@ FEEDBACK_LOG_FILE = 'logs/feedback_log.json'
 if not os.path.exists('logs'):
     os.makedirs('logs')
 
+if os.path.exists(FEEDBACK_LOG_FILE):
+    with open(FEEDBACK_LOG_FILE, 'rb') as f:
+        raw_data = f.read()
+    # UTF-8로 디코딩하면서 문제가 되는 문자는 '?'로 대체
+    decoded_data = raw_data.decode('utf-8', errors='replace')
+    feedback_log = json.loads(decoded_data)
+    
 app = Flask(__name__)
 
 # OpenAI API 키 설정
