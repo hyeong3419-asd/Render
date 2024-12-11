@@ -7,6 +7,8 @@ import base64
 from datetime import datetime
 from google.cloud import translate_v2 as translate
 
+app.logger.info("Feedback saved: %s", feedback)
+
 # 피드백 로그 파일 설정
 FEEDBACK_LOG_FILE = 'logs/feedback_log.json'
 if not os.path.exists('logs'):
