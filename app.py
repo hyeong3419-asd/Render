@@ -5,6 +5,7 @@ import os
 import json
 import base64
 import pymysql
+from bs4 import BeautifulSoup
 from datetime import datetime
 from google.cloud import translate_v2 as translate
 
@@ -40,6 +41,26 @@ with open(credentials_path, "w") as f:
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
 
 translator_client = translate.Client()
+
+def crawl_namu(query):
+    """나무위키에서 특정 쿼리와 관련된 데이터를 크롤링"""
+    base_url = "https://namu.wiki/w/"
+    search_url = base_url + requests.utils.quote(query)
+
+    try:
+        response = requests.get(search_url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # 페이지 주요 내용 가져오기
+        content = soup.find(id="content")
+        if content:
+            return content.get_text(strip=True)
+        return None
+    except Exception as e:
+        app.logger.error(f"Error crawling Namuwiki: {str(e)}")
+        return None
+
 
 @app.route('/feedback', methods=['POST'])
 def save_feedback():
@@ -138,6 +159,10 @@ def check_news():
         feedback_summary = "\n".join([f"- {fb['comment']} (Rating: {fb['rating']})" for fb in feedbacks])
         prompt += f"\n\nPast User Feedback for similar queries:\n{feedback_summary}\n"
 
+    # 나무위키 데이터 크롤링
+    reference_text = crawl_namu(query)
+    if reference_text:
+        prompt += f"\n\nReference Text from Namuwiki:\n{reference_text}\n"
 
     # GPT 호출
     chatgpt_response = get_chatgpt_response(translated_query, prompt)
