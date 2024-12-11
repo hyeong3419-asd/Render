@@ -108,13 +108,6 @@ def home():
 @app.route('/check', methods=['POST'])
 def check_news():
 
-    chatgpt_response = get_chatgpt_response(translated_query, prompt)
-
-    # chatgpt_response를 한국어로 번역
-    chatgpt_response_ko = translate_text(chatgpt_response, target_language="ko")
-
-    factcheck_response = get_factcheck_response(translated_query)
-
     query = request.form.get('query', '')
     prompt = """You are an expert in detecting fake news, disinformation, and manipulated content. Analyze the following news article and determine whether it is 'Real', 'Fake', or 'Uncertain'."""
 
