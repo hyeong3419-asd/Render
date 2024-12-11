@@ -38,6 +38,7 @@ with open(credentials_path, "w") as f:
 # 인증 파일 경로 설정
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
 
+translator_client = translate.Client()
 
 @app.route('/feedback', methods=['POST'])
 def save_feedback():
