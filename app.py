@@ -11,10 +11,6 @@ from google.cloud import translate_v2 as translate
 FEEDBACK_LOG_FILE = 'logs/feedback_log.json'
 if not os.path.exists('logs'):
     os.makedirs('logs')
-
-with open(FEEDBACK_LOG_FILE, 'r', encoding='utf-8') as f:
-    feedback_log = json.load(f)
-
     
 app = Flask(__name__)
 
