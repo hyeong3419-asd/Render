@@ -68,10 +68,10 @@ def save_feedback():
 def include_feedback_in_prompt(prompt='', query=''):
     feedbacks = get_feedback_for_query(query)
     if feedbacks:
-        feedback_summary = "\n".join([f"Query: {fb['query']}, Rating: {fb['rating']}, Comment: {fb['comment']}" 
-                                      for fb in feedbacks])
-        return f"{prompt}\n\nPast User Feedback:\n{feedback_summary}"
+        feedback_summary = "\n".join([f"- {fb['comment']} (Rating: {fb['rating']})" for fb in feedbacks])
+        return f"{prompt}\n\nPast User Feedback for similar queries:\n{feedback_summary}\n\nUse this feedback to refine your response."
     return prompt
+
 
 
 
@@ -131,10 +131,21 @@ def check_news():
     except Exception as e:
         app.logger.error(f"Translation error: {str(e)}")
         return jsonify({"status": "error", "message": "번역 중 오류가 발생했습니다."})
+        
+    # 피드백 데이터 가져오기
+    feedbacks = get_feedback_for_query(query)
+    if feedbacks:
+        feedback_summary = "\n".join([f"- {fb['comment']} (Rating: {fb['rating']})" for fb in feedbacks])
+        prompt += f"\n\nPast User Feedback for similar queries:\n{feedback_summary}\n"
 
+
+    # GPT 호출
     chatgpt_response = get_chatgpt_response(translated_query, prompt)
+    
+    # FactCheck API 호출
     factcheck_response = get_factcheck_response(translated_query)
 
+    # FactCheck 결과 번역
     try:
         if factcheck_response.get("text"):
             factcheck_response["text"] = translate_text(factcheck_response["text"], target_language="ko")
