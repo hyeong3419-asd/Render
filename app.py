@@ -26,6 +26,10 @@ credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 if not credentials_path:
     raise ValueError("환경 변수 'GOOGLE_APPLICATION_CREDENTIALS'가 설정되지 않았습니다.")
 
+# JSON 내용 읽기
+with open(credentials_path, 'r') as f:
+    credentials_json = f.read()  # JSON 문자열로 읽기
+
 # JSON 내용을 파일로 저장
 credentials_path = "/tmp/google-credentials.json"
 with open(credentials_path, "w") as f:
