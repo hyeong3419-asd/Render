@@ -63,7 +63,9 @@ def save_feedback():
         feedback_log.append(feedback)
         with open(FEEDBACK_LOG_FILE, 'w') as f:
             json.dump(feedback_log, f, ensure_ascii=False, indent=4)
-
+            
+        app.logger.info("Feedback saved: %s", feedback)
+        
         return jsonify({"status": "success", "message": "피드백이 저장되었습니다."})
     except Exception as e:
         app.logger.error(f"Feedback save error: {str(e)}")
@@ -234,7 +236,6 @@ def get_factcheck_response(query):
             "image_url": ""
         }
 
-app.logger.info("Feedback saved: %s", feedback)
 
 if __name__ == '__main__':
     app.run(debug=True)
