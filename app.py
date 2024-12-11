@@ -26,6 +26,11 @@ credentials_path = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 if not credentials_path:
     raise ValueError("환경 변수 'GOOGLE_APPLICATION_CREDENTIALS'가 설정되지 않았습니다.")
 
+# JSON 내용을 파일로 저장
+credentials_path = "/tmp/google-credentials.json"
+with open(credentials_path, "w") as f:
+    f.write(credentials_json)
+
 # 인증 파일 경로 설정
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
 
