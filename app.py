@@ -108,12 +108,13 @@ def check_news():
    
 5. **Language and Translation**:
    Your final analysis must be delivered in **Korean only**, formatted as a single, cohesive paragraph. Use clear and natural Korean language, avoiding English terms unless absolutely necessary (e.g., proper nouns). Ensure the flow is logical and concise.
+   also don't use the term "Acording to the database..", etc
 ### Example:
 User Question: "What are the impacts of climate change on global agriculture?"
 Database Information (if available): "Studies show that climate change is reducing crop yields by 15% in certain regions due to droughts and temperature variability."
 
 Response:
-"Based on database insights, climate change is reducing crop yields by approximately 15% in specific regions due to drought and temperature fluctuations. Additionally, general studies highlight long-term risks to global food security."
+"Climate change is reducing crop yields by approximately 15% in specific regions due to drought and temperature fluctuations. Additionally, general studies highlight long-term risks to global food security."
 
 If no database information is available:
 "While there is no database information available for this query, research indicates that climate change significantly impacts agriculture by altering weather patterns, increasing drought frequency, and reducing arable land."
