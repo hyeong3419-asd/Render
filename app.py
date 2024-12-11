@@ -4,6 +4,7 @@ import requests
 import os
 import json
 import base64
+import pymysql
 from datetime import datetime
 from google.cloud import translate_v2 as translate
 
@@ -42,54 +43,36 @@ translator_client = translate.Client()
 
 @app.route('/feedback', methods=['POST'])
 def save_feedback():
-    """
-    사용자 피드백을 저장하는 API
-    """
     data = request.json
     feedback = {
         "query": data.get('query'),
         "rating": data.get('rating'),
-        "comment": data.get('comment'),
-        "timestamp": datetime.now().isoformat()
+        "comment": data.get('comment')
     }
-    try:
-        # 로그 파일이 있는지 확인
-        feedback_log = []
-        if os.path.exists(FEEDBACK_LOG_FILE):
-            with open(FEEDBACK_LOG_FILE, 'r') as f:
-                feedback_log = json.load(f)
 
-        # 피드백 저장
-        feedback_log.append(feedback)
-        with open(FEEDBACK_LOG_FILE, 'w') as f:
-            json.dump(feedback_log, f, ensure_ascii=False, indent=4)
-            
-        app.logger.info("Feedback saved: %s", feedback)
-        
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            sql = "INSERT INTO feedback_log (query, rating, comment) VALUES (%s, %s, %s)"
+            cursor.execute(sql, (feedback['query'], feedback['rating'], feedback['comment']))
+        conn.commit()
+        conn.close()
+
         return jsonify({"status": "success", "message": "피드백이 저장되었습니다."})
     except Exception as e:
         app.logger.error(f"Feedback save error: {str(e)}")
         return jsonify({"status": "error", "message": "피드백 저장 중 오류가 발생했습니다."})
 
 
-def include_feedback_in_prompt(prompt=''):
-    """
-    기존 피드백 로그를 GPT 프롬프트에 추가
-    """
-    try:
-        feedback_log = []
-        if os.path.exists(FEEDBACK_LOG_FILE):
-            with open(FEEDBACK_LOG_FILE, 'r') as f:
-                feedback_log = json.load(f)
 
-        # 로그 데이터를 프롬프트에 추가
-        feedback_summary = "\n".join(
-            [f"Query: {fb['query']}, Rating: {fb['rating']}, Comment: {fb['comment']}" for fb in feedback_log]
-        )
+def include_feedback_in_prompt(prompt='', query=''):
+    feedbacks = get_feedback_for_query(query)
+    if feedbacks:
+        feedback_summary = "\n".join([f"Query: {fb['query']}, Rating: {fb['rating']}, Comment: {fb['comment']}" 
+                                      for fb in feedbacks])
         return f"{prompt}\n\nPast User Feedback:\n{feedback_summary}"
-    except Exception as e:
-        app.logger.error(f"Error including feedback in prompt: {str(e)}")
-        return prompt
+    return prompt
+
 
 
 def translate_text(text, target_language="ko"):
@@ -128,7 +111,7 @@ def check_news():
 
     7. **Context Omission or Misrepresentation**: Check whether the article omits essential context or presents facts in a misleading way. Use tools like [Hoaxy](https://hoaxy.osome.iu.edu) to visualize the spread of information and determine if crucial context is missing. If context is manipulated, classify the article as 'Fake'.
 
-    8. **번역**: 분석 결과는 각 항목별 제목 없이 한국어로 일관된 형태의 요약으로 제공되어야 합니다.
+    8. **번역**: 번역: 분석 결과는 각 항목별 번호나 소제목 없이 하나의 단일 단락 형태로 한국어로만 제시해야 하며, 영어 표현이나 불필요한 형식을 사용하지 않고 명확하고 일관된 서술로 모든 평가 결과를 자연스럽게 전달한다.
 
     **Specialized Tools**:  
     - **Deepfake Detection**: If visuals seem altered or manipulated, assess them using deepfake detection tools such as [Sensity AI](https://www.sensity.ai) or [Defudger](https://defudger.com).  
@@ -182,20 +165,17 @@ def check_news():
 
     return jsonify(result)
 
-def get_chatgpt_response(query, prompt=''):
-    try:
-        prompt = include_feedback_in_prompt(prompt)
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": query}
-            ]
-        )
-        return response['choices'][0]['message']['content']
-    except Exception as e:
-        app.logger.error(f"ChatGPT API error: {str(e)}")
-        return f"챗GPT 호출 에러: {str(e)}"
+def get_chatgpt_response(query, base_prompt=''):
+    prompt = include_feedback_in_prompt(base_prompt, query)
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": query}
+        ]
+    )
+    return response['choices'][0]['message']['content']
+
 
 def get_factcheck_response(query):
     try:
@@ -235,6 +215,30 @@ def get_factcheck_response(query):
             "url": "",
             "image_url": ""
         }
+        
+def get_connection():
+    return pymysql.connect(
+        host='localhost',
+        user='root',
+        password='135790',
+        db='capstone',
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    
+def get_feedback_for_query(query):
+    feedbacks = []
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = "SELECT query, rating, comment FROM feedback_log WHERE query = %s ORDER BY id DESC LIMIT 10"
+            cursor.execute(sql, (query,))
+            feedbacks = cursor.fetchall()
+    except Exception as e:
+        app.logger.error(f"Error fetching feedback: {str(e)}")
+    finally:
+        conn.close()
+    return feedbacks
 
 
 if __name__ == '__main__':
