@@ -116,7 +116,6 @@ Database Information (if available): "데이터베이스 정보에 따르면, 20
 Response:
 "2024년 롤드컵 우승 팀은 LCK의 T1으로 확인되었습니다. 이는 월드 챔피언십에서 공식 발표된 결과입니다."
 
----
 
 ### User Question:
 [Insert user's question here]
