@@ -41,7 +41,7 @@ with open(credentials_path, "w") as f:
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_path
 translator_client = translate.Client()
 
-@app.route('/feedback', methods=['POST'])
+@app.route('/feedback', methods=['POST']) #이 경로로 들어오면 함수 실행
 def save_feedback():
     data = request.json
     feedback = {
@@ -170,7 +170,8 @@ Response:
         "google_news_url": google_news_url
     }
     return jsonify(result)
-    
+
+#GPT 모델 호출 및 응답 반환
 def get_chatgpt_response(query, base_prompt=''):
     # 데이터베이스 정보를 포함한 프롬프트 생성
     prompt_with_db_info = build_prompt_with_database_info(query, base_prompt)
@@ -187,7 +188,7 @@ def get_chatgpt_response(query, base_prompt=''):
     return response['choices'][0]['message']['content']
 
 
-    
+#FactCheck API 호출 및 결과 반환.    
 def get_factcheck_response(query):
     try:
         params = {
